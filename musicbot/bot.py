@@ -3974,6 +3974,7 @@ class MusicBot(discord.Client):
                         next_url,
                         head,
                         ignore_video_id=ignore_vid,
+                        skip_first_song=True,
                     )
                     await self.safe_delete_message(msg)
                 elif reaction.emoji == EMOJI_CROSS_MARK_BUTTON:
@@ -4026,6 +4027,7 @@ class MusicBot(discord.Client):
         shuffle_entries: bool = False,
         ignore_video_id: str = "",
         skip_playing: bool = False,
+        skip_first_song: bool = False
     ) -> CommandResponse:
         """
         This function handles actually adding any given URL or song subject to
@@ -4080,7 +4082,7 @@ class MusicBot(discord.Client):
 
         # Validate song_url is actually a URL, or otherwise a search string.
         valid_song_url = self.downloader.get_url_or_none(song_url)
-        if valid_song_url:
+        if valid_song_url and not skip_first_song:
             song_url = valid_song_url
             self._do_song_blocklist_check(song_url)
 
