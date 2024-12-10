@@ -3985,12 +3985,23 @@ class MusicBot(discord.Client):
         # https://youtu.be/VID?list=PLID
         # https://www.youtube.com/watch?v=VID&list=PLID
         playlist_regex = re.compile(
-            r"(?:youtube.com/watch\?v=|youtu\.be/)([^?&]{6,})[&?]{1}(list=PL[^&]+)",
-            re.I | re.X,
-        )
+            r"(?:youtube.com/watch\?v=|youtu\.be/)([^?&]{6,})[&?]{1}list=([^&]+)",
+             re.I | re.X,
+         )
         matches = playlist_regex.search(song_url)
         if matches:
-            pl_url = "https://www.youtube.com/playlist?" + matches.group(2)
+            ignore_vid = matches.group(1)
+            playlist_id = matches.group(2)
+            
+            if playlist_id.startswith('PL'):
+                # a normal playlist
+                pl_url = "https://www.youtube.com/playlist?list=" + playlist_id
+            elif playlist_id.startswith('RD'):
+                # a custom youtube mix
+                pl_url = f"https://www.youtube.com/watch?v={ignore_vid}list={playlist_id}"
+            else:
+                raise Exception('Unexpected type of playlist')
+
             ignore_vid = matches.group(1)
             self.create_task(
                 _prompt_for_playing(
